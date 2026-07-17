@@ -1,0 +1,681 @@
+MEME version 4
+
+ALPHABET = ACGT
+
+strands: + -
+
+Background letter frequencies
+A 0.25 C 0.25 G 0.25 T 0.25
+
+MOTIF AAAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+
+MOTIF GGAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+
+MOTIF GAAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+
+MOTIF AGAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+
+MOTIF TGAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+1 0 0 0
+1 0 0 0
+
+MOTIF TTTT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 0 0 1
+0 0 0 1
+
+MOTIF TAAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+1 0 0 0
+1 0 0 0
+
+MOTIF TGAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+1 0 0 0
+0 0 1 0
+
+MOTIF CTCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 0 1
+0 1 0 0
+0 1 0 0
+
+MOTIF TGTT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 0 1
+0 0 0 1
+
+MOTIF GTAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+1 0 0 0
+1 0 0 0
+
+MOTIF GTTC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 0 0 1
+0 1 0 0
+
+MOTIF GAAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+0 0 1 0
+
+MOTIF AGAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+0 0 1 0
+
+MOTIF AGCA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 1 0 0
+1 0 0 0
+
+MOTIF GAGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+
+MOTIF CACC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+1 0 0 0
+0 1 0 0
+0 1 0 0
+
+MOTIF GTCA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+1 0 0 0
+
+MOTIF GTTG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 0 0 1
+0 0 1 0
+
+MOTIF GTGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 0 1 0
+0 0 1 0
+
+MOTIF TGAT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+1 0 0 0
+0 0 0 1
+
+MOTIF TGCA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+1 0 0 0
+
+MOTIF TGGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 1 0
+0 0 1 0
+
+MOTIF AAGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+
+MOTIF AAAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+0 1 0 0
+
+MOTIF TGGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 1 0
+1 0 0 0
+
+MOTIF AGAT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+0 0 0 1
+
+MOTIF AGGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 0 1 0
+1 0 0 0
+
+MOTIF TAAT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+1 0 0 0
+0 0 0 1
+
+MOTIF TGTC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 0 1
+0 1 0 0
+
+MOTIF TTTC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 0 0 1
+0 1 0 0
+
+MOTIF GTGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+
+MOTIF GTGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 0 1 0
+0 0 0 1
+
+MOTIF TGCT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+0 0 0 1
+
+MOTIF GAAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+0 1 0 0
+
+MOTIF TACA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 1 0 0
+1 0 0 0
+
+MOTIF GTAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+
+MOTIF TTAT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+1 0 0 0
+0 0 0 1
+
+MOTIF TAAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+1 0 0 0
+0 0 1 0
+
+MOTIF TGAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+1 0 0 0
+0 1 0 0
+
+MOTIF TGCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+0 1 0 0
+
+MOTIF GGGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 1 0
+0 0 1 0
+0 0 0 1
+
+MOTIF TTCA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 1 0 0
+1 0 0 0
+
+MOTIF AGAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+1 0 0 0
+0 1 0 0
+
+MOTIF AGCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 1 0 0
+0 1 0 0
+
+MOTIF GTCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+0 1 0 0
+
+MOTIF TAGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+1 0 0 0
+
+MOTIF GAGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+0 0 1 0
+0 0 1 0
+
+MOTIF TCAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 1 0 0
+1 0 0 0
+0 0 1 0
+
+MOTIF TGGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 1 0
+0 1 0 0
+
+MOTIF TGGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 0 1 0
+0 0 0 1
+
+MOTIF TTCT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 1 0 0
+0 0 0 1
+
+MOTIF TAAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+1 0 0 0
+0 1 0 0
+
+MOTIF GTAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+1 0 0 0
+0 1 0 0
+
+MOTIF AGTC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+
+MOTIF TCCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 1 0 0
+0 1 0 0
+0 1 0 0
+
+MOTIF ATGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+
+MOTIF TTAG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+1 0 0 0
+0 0 1 0
+
+MOTIF TTGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 0 1 0
+0 0 0 1
+
+MOTIF GAGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+0 0 1 0
+0 1 0 0
+
+MOTIF GAGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+1 0 0 0
+0 0 1 0
+0 0 0 1
+
+MOTIF AAGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+1 0 0 0
+0 0 1 0
+0 1 0 0
+
+MOTIF AGGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 0 1 0
+0 1 0 0
+
+MOTIF AAGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+1 0 0 0
+0 0 1 0
+0 0 0 1
+
+MOTIF TTCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 1 0 0
+0 1 0 0
+
+MOTIF TTAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+1 0 0 0
+0 1 0 0
+
+MOTIF TACT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 1 0 0
+0 0 0 1
+
+MOTIF TTGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 0 1 0
+0 0 1 0
+
+MOTIF TACC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 1 0 0
+0 1 0 0
+
+MOTIF TAGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+0 0 1 0
+
+MOTIF AGGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 0 1 0
+0 0 1 0
+0 0 0 1
+
+MOTIF TTGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 0 1 0
+0 1 0 0
+
+MOTIF TAGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+0 0 0 1
+
+MOTIF CGAA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+1 0 0 0
+1 0 0 0
+
+MOTIF TAGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+0 1 0 0
+
+MOTIF CGGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 0 1 0
+0 0 1 0
+
+MOTIF CGCC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 1 0 0
+0 1 0 0
+
+MOTIF CGTT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 0 0 1
+0 0 0 1
+
+MOTIF CGAT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+1 0 0 0
+0 0 0 1
+
+MOTIF CGCT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 1 0 0
+0 0 0 1
+
+MOTIF GCGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 1 0 0
+0 0 1 0
+1 0 0 0
+
+MOTIF CGGA
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 0 1 0
+1 0 0 0
+
+MOTIF CGTC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+
+MOTIF GCGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 1 0 0
+0 0 1 0
+0 0 1 0
+
+MOTIF GCGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 1 0 0
+0 0 1 0
+0 0 0 1
+
+MOTIF GCGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 1 0 0
+0 0 1 0
+0 1 0 0
+
+MOTIF CGAC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+1 0 0 0
+0 1 0 0
+
+MOTIF CGGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 1 0 0
+0 0 1 0
+0 0 1 0
+0 0 0 1
+
+MOTIF GTCG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 1 0
+0 0 0 1
+0 1 0 0
+0 0 1 0
+
+MOTIF TGCG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 1 0
+0 1 0 0
+0 0 1 0
+
+MOTIF ACGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+1 0 0 0
+0 1 0 0
+0 0 1 0
+0 0 1 0
+
+MOTIF TACG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+1 0 0 0
+0 1 0 0
+0 0 1 0
+
+MOTIF TTCG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 0 0 1
+0 1 0 0
+0 0 1 0
+
+MOTIF TCGG
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 1 0 0
+0 0 1 0
+0 0 1 0
+
+MOTIF TCGT
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 1 0 0
+0 0 1 0
+0 0 0 1
+
+MOTIF TCGC
+letter-probability matrix: alength= 4 w= 4 nsites= 1 E= 0
+0 0 0 1
+0 1 0 0
+0 0 1 0
+0 1 0 0
+
