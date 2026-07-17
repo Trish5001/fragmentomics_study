@@ -1,0 +1,95 @@
+---
+title: "cfDNApipe Data Analysis"
+author: "Trish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r loading datafiles and packages}
+library(tidyverse)
+library(table1)
+library(knitr)
+
+cfDNApipeData <- read_excel("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/R_Code/cfDNApipeData.xlsx")
+
+```
+```{r tables and graphs from data}
+cfDNApipeData %>%
+  group_by(Group) %>%
+  summarise(sample.size = n(),
+            mean.peak1 = round(mean(Peak_1), 1),
+            SD.peak1 = round(sd(Peak_1), 1),
+            mean.peak2 = round(mean(Peak_2), 1),
+            SD.peak2 = round(sd(Peak_2), 1)
+  )
+
+#using table1 package for formatted table
+table1(~ Peak_1 + Peak_2 | Group, data=cfDNApipeData) 
+
+saveRDS(table1, "cfDNApipeLengths.rds")
+
+kable(table1,
+      format = "latex",
+      booktabs = TRUE,
+      caption = "A summary of cfDNA lengths for cancer and control treatments")
+
+#graph comparing peak 1 for both groups
+cfDNApipeData %>%
+  ggplot(aes(x = Peak_1, y = Group, fill = Group)) + 
+  geom_boxplot() +
+  stat_summary(fun = mean, colour = "yellow", geom = "point", shape =18, size = 3) +
+  labs(title = "Boxplot comparing Peak 1 values for the Cancer and Normal groups", 
+       subtitle = "(mean symbol superimposed)" ) +
+  xlab("Fragment Size (Base Pairs)") +
+  ylab("") + 
+  theme(legend.position = "none")
+
+#graph comparing peak 2 for both groups
+cfDNApipeData %>%
+  ggplot(aes(x = Peak_2, y = Group, fill = Group)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, colour = "yellow", geom = "point", shape = 18, size = 3) +
+  labs(title = "Boxplot comparing Peak 2 values for the Cancer and Normal groups",
+       subtitle = "(mean symbol superimposed)") +
+  xlab("Fragment Size (Base Pairs)") +
+  ylab("") +
+  theme(legend.position = "none")
+
+#Welch's t-test for peak 1 in both groups
+t.test(Peak_1 ~ Group, conf.level = 0.95,
+       data = cfDNApipeData)
+
+#Welch's t-test for peak 2 in both groups
+t.test(Peak_2 ~ Group, conf.level = 0.95,
+       data = cfDNApipeData)
+
+#Wilcox test for peak 1 in both groups
+wilcox.test(Peak_1 ~ Group, conf.int = TRUE, 
+            conf.level = 0.95, data = cfDNApipeData)
+  
+
+#Wilcox test for peak 2 in both groups
+wilcox.test(Peak_2 ~ Group, conf.int = TRUE, 
+            conf.level = 0.95, data = cfDNApipeData)
+
+#plotting peak fragment lenghths
+
+stripchart(cfDNApipeData$Peak_1)
+
+stripchart(cfDNApipeData$Peak_2)
+
+boxplot(cfDNApipeData$Peak_1, horizontal = TRUE)
+
+
+```
+

@@ -1,0 +1,187 @@
+---
+title: "delfi graphs"
+author: "Trish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r raise libraries}
+library(tidyverse)
+
+```
+```{r read in data filesets}
+delfi <- list.files("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/FinaleDB/delfiStyleData", pattern = "tsv$", full.names = TRUE)
+
+delfi <- delfi %>%
+  set_names(basename(.)) %>%
+  map_dfr(
+    ~ read.delim(.x), 
+    .id = "file"
+  )
+
+#Adding cancer and control labels to dataframe
+
+delfi <- delfi %>%
+  mutate(
+    treatment = case_when(
+      str_detect(file, "Ascite") ~ "Cancer",
+      str_detect(file, "PF") ~ "Control"
+    )
+  )
+
+```
+```{r genome in order of chromosomes}
+
+delfi <- delfi %>% 
+  rename(chr = X.contig)
+
+chrom_order <- as.character(1:22)
+
+delfi <- delfi %>%
+  mutate(chr = factor(chr, levels = chrom_order)) %>%
+  arrange(chr, start) %>%
+  group_by(file) %>%
+  mutate(genome_bin = row_number()) %>%
+  ungroup()
+
+```
+```{r boxplot of delfi ratios}
+
+ggplot(delfi,
+       aes(x = treatment, 
+           y = ratio_corrected,
+           fill = treatment)) +
+  geom_boxplot() +
+  labs(title = "DELFI Ratios for each treatment",
+       y = "DELFI Ratio")
+
+ggsave("delfi_boxplot.png")
+
+```
+
+```{r violin plots}
+
+ggplot(delfi,
+       aes(x = treatment,
+           y = ratio_corrected,
+           fill = treatment)) +
+  geom_violin() +
+  labs(title = "DELFI Ratios for each treatment",
+       y = "DELFI Ratio")
+
+ggsave("delphi_violinplot.png")
+```
+
+```{r histogram}
+
+ggplot(delfi,
+       aes(ratio_corrected, 
+           fill = treatment)) +
+  geom_histogram() +
+  labs(title = "Histogram of DELFI Ratios")
+
+ggsave("delfi_histogram.png")
+```
+
+```{r looking at samples}
+
+delfi <- delfi %>%
+  mutate(short_name = sub("-rmdup.*", "", file))
+
+sample_summary <- delfi %>%
+  group_by(short_name, treatment)%>%
+  summarise(
+    mean_ratio = mean(ratio_corrected)
+  )
+
+ggplot(sample_summary,
+       aes(short_name, mean_ratio,
+           fill = treatment)) + 
+  geom_col() +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  ) +
+  labs(title = "Mean DELFI ratio for each Sample",
+       y = "Mean DELFI Score",
+       x = "Sample",
+       fill = "Treatment") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+ggsave("DELFI_sample_scores.png")
+
+```
+
+```{r Cristiano style delfi plots}
+
+#for all samples
+ggplot(delfi,
+       aes(genome_bin,
+           ratio_corrected, 
+           colour = treatment,
+           group = file)) + 
+  geom_line(alpha = 0.3) +
+  labs(title = "Cristiano style DELFI plots",
+       y = "DELFI ratio",
+       x = "genome bin",
+       fill = "Treatment")
+ggsave("Cristiano Style DELFI plot.png")
+
+```
+```{r plotting mean values for Cristiano style plot}
+
+delfi_mean_values <- delfi %>%
+  group_by(genome_bin, treatment) %>%
+  summarise(mean_Delfi_score = mean(ratio_corrected))%>%
+  ungroup()
+
+ggplot(delfi_mean_values, 
+  aes(genome_bin,
+           mean_Delfi_score, 
+           colour = treatment)) + 
+  geom_line(alpha = 1) +
+  labs(title = "Cristiano style (mean) DELFI plots",
+       y = "DELFI (mean)ratio",
+       x = "genome bin",
+       fill = "Treatment")
+  
+ggsave("Mean DELFI Plots.png")
+
+```
+```{r combining the DELFI plots (indiviual and mean)}
+
+ggplot() +
+  geom_line(data = delfi,
+            aes(genome_bin,
+           ratio_corrected, 
+           colour = treatment,
+           group = file),
+           alpha = 0.2) +
+  geom_line(data = delfi_mean_values, 
+            aes(genome_bin,
+           mean_Delfi_score, 
+           colour = treatment), 
+           alpha = 1) +
+  labs(title = "Cristiano Style DELFI Plots",
+       subtitle = "Individual Samples with Mean Values Superimposed",
+       y = "DELFI Ratio",
+       x = "genome bin",
+       colour = "Treatment")
+
+ggsave("Combined_mean_and_samples_DELFI.png")
+
+```
+

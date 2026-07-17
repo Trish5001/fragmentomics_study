@@ -1,0 +1,513 @@
+---
+title: "CNV calculations"
+author: "Trish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+```{r calling libraries}
+library(tidyverse)
+library(RTCGA)
+library(RTCGA.CNV)
+library(BiocManager)
+library(GenomicRanges)
+library(generics)
+library(BiocGenerics)
+library(S4Vectors)
+library(IRanges)
+library(Seqinfo)
+library(devtools)
+library(data.table)
+library(here)
+library(patchwork)
+
+```
+
+
+```{r calling in CNV segment files for each sample}
+
+Ascites2.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites2-rmdup.cns")
+
+Ascites3.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites3-rmdup.cns")
+
+Ascites4.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites4-rmdup.cns")
+
+Ascites5.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites5-rmdup.cns")
+
+Ascites6.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites6-rmdup.cns")
+
+Ascites7.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/Ascites7-rmdup.cns")
+
+PF12.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF12-rmdup.cns")
+
+PF13.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF13-rmdup.cns")
+
+PF15.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF15-rmdup.cns")
+
+PF19.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF19-rmdup.cns")
+
+PF26.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF26-rmdup.cns")
+
+PF29.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF29-rmdup.cns")
+
+PF32.rmdup <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/cfDNApipe/using 6 cancer and 7 normal data samples June1/CNV plots/PF32-rmdup.cns")
+
+```
+
+```{r manipulating files}
+
+
+#adding sample name to each file
+CNS_files <- ls(pattern = "^Ascites|^PF")
+
+for (name in CNS_files) {
+  df <- get(name)
+  df$CNS_source <- name
+  assign(name, df)
+  
+}
+
+rm(df)
+rm(name)
+
+
+#labelling each ascites file as cancer
+Ascites_files <- ls(pattern = "^Ascites")
+
+for (name in Ascites_files) {
+  df <- get(name)
+  df$treatment <- "cancer"
+  assign(name, df)
+  
+  
+} 
+
+rm(df)
+rm(name)
+
+#labelling each plasma file as control
+PF_files <- ls(pattern = "^PF")
+
+for (name in PF_files) {
+  df <- get(name)
+  df$treatment <- "control"
+  assign(name, df)
+  
+} 
+
+rm(df)
+rm(name)
+
+#removing columns not needed for CNV analysis
+for (name in CNS_files) {
+  df <- get(name)
+  df <- df[ , !colnames(df) %in% c("gene","depth","probes", "weight")]
+  assign(name,df)
+}
+
+rm(df)
+rm(name)
+
+all_CNS_files_df <- CNS_files %>%
+  set_names() %>%
+  map(get) %>%
+  bind_rows()
+
+all_CNS_files_df <- all_CNS_files_df %>%
+  filter(chromosome %in% paste0("chr", 1:22)) %>%
+  mutate(chrom = as.integer(str_remove(chromosome, "chr")), 
+         sample = CNS_source) %>%
+  select(sample, treatment, chrom, start, end, log2)
+  
+
+
+
+
+```
+
+```{r getting info from reference genome hg38}
+
+cytoband_url <- "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz"
+cytoband <- read_tsv(cytoband_url,
+                     col_names = c("chrom", "start", "end", "name", "giestain"), show_col_types = FALSE)
+
+#just keeping the autosomes
+cytoband <- cytoband %>%
+  filter(chrom %in% paste0("chr", 1:22))
+
+#Getting centromere boundaries
+centromeres <- cytoband %>%
+  filter(giestain == "acen") %>%
+  group_by(chrom) %>%
+  summarise(
+    p_arm_end = min(start),
+    q_arm_start = max(end)) %>%
+  ungroup() %>%
+    mutate(chrom = as.integer(str_remove(chrom, "chr")))
+
+#Getting chromosome sizes
+chrom_size_url <- "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz"
+chrom_size <- read_tsv(chrom_size_url,
+                       col_names = c("chrom", "size", "filename"),
+                       show_col_types = FALSE)
+
+chrom_size <- chrom_size %>%
+  filter(chrom %in% paste0("chr", 1:22)) %>%
+  mutate(chrom = as.integer(str_remove(chrom, "chr"))) %>%
+  dplyr::select(chrom, size)
+
+#building the arms dataframe
+    
+arms_df <- centromeres %>%
+  left_join(chrom_size, by = "chrom") %>%
+  mutate(
+    p_start = 1,
+    p_end = p_arm_end,
+    q_start = q_arm_start,
+    q_end = size) %>%
+  dplyr::select(chrom, p_start, p_end, q_start, q_end) %>%
+  pivot_longer(
+    cols = -chrom, 
+    names_to = c("arm", ".value"),
+    names_sep = "_") %>%
+  mutate(arm = paste0(chrom, arm)) %>%
+  dplyr::select(chrom, arm, start, end)
+    
+    
+  
+
+```
+
+```{r setting thresholds}
+
+gain_threshold <- 0.3
+loss_threshold <- -0.3
+
+all_CNS_files_df <- all_CNS_files_df %>%
+  mutate(
+    cnv_type = case_when(
+      log2 > gain_threshold ~ "gain",
+      log2 < loss_threshold ~ "loss",
+      TRUE ~ "neutral"))# %>%
+  #filter(cnv_type != "neutral")
+
+
+```
+
+```{r mapping our files to chromosome arms}
+gr_segs <- GRanges(
+  seqnames = all_CNS_files_df$chrom,
+  ranges = IRanges(start = all_CNS_files_df$start, 
+                   end = all_CNS_files_df$end),
+  sample = all_CNS_files_df$sample, 
+  cnv_type = all_CNS_files_df$cnv_type,
+treatment = all_CNS_files_df$treatment,
+log2 = all_CNS_files_df$log2)
+
+gr_arms <- GRanges(
+  seqnames = arms_df$chrom,
+  ranges = IRanges(start = arms_df$start, end = arms_df$end),
+  arm = arms_df$arm)
+```
+
+```{r calculating hits and overlaps}
+
+hits <- findOverlaps(gr_arms, gr_segs)
+
+arm_segment_overlaps <- tibble(
+  arm_index = queryHits(hits),
+  segment_index = subjectHits(hits),
+  arm = mcols(gr_arms)$arm[queryHits(hits)],
+  sample = mcols(gr_segs)$sample[subjectHits(hits)],
+  treatment = mcols(gr_segs)$treatment[subjectHits(hits)],
+  segment_log2 = mcols(gr_segs)$log2[subjectHits(hits)],
+  overlap_bp = width(
+    pintersect(
+      gr_arms[queryHits(hits)],
+      gr_segs[subjectHits(hits)]
+    )
+  )
+)
+#calculating arm values
+arm_values <- arm_segment_overlaps %>%
+  group_by(sample, treatment, arm) %>%
+  summarise(
+    arm_log2 = weighted.mean(
+      segment_log2,
+      w = overlap_bp,
+      na.rm = TRUE
+    ),
+    covered_bp = sum(overlap_bp), 
+    .groups = "drop"
+  )
+
+chrlevels <- arms_df %>%
+  arrange(chrom, start) %>%
+  pull(arm)
+
+```
+
+
+
+```{r changing arm values to z scores}
+
+control_reference <- arm_values %>%
+  filter(treatment == "control") %>%
+  group_by(arm) %>%
+  summarise(
+    control_mean = mean(arm_log2, na.rm = TRUE),
+    control_sd = sd(arm_log2, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+arm_zscores <- arm_values %>%
+  left_join(control_reference, by = "arm") %>%
+  mutate(
+    z = if_else(
+      is.finite(control_sd) & control_sd > 0,
+      (arm_log2 - control_mean) / control_sd,
+      NA_real_
+    ),
+    call = case_when(
+       z >= 3 ~ "gain",
+       z <= -3 ~ "loss", 
+       TRUE ~ "neutral"
+     ),
+    
+    arm = factor(arm, levels = rev(chrlevels))
+  )
+
+#increased standardisation to allow for small number of samples
+control_reference_robust <- arm_values %>%
+  filter(treatment == "control")%>%
+  group_by(arm)%>%
+  summarise(
+    control_median = median(arm_log2, na.rm = TRUE),
+    control_mad = mad(
+      arm_log2, 
+      center = control_median,
+      constant = 1.4826, 
+      na.rm = TRUE
+    ), .groups = "drop"
+  )
+
+ arm_zscores <- arm_values %>%
+   left_join(control_reference_robust, by = "arm") %>%
+   mutate(
+     z = if_else(
+       is.finite(control_mad) & control_mad > 0,
+       (arm_log2 - control_median) / control_mad, NA_real_
+     ),
+     call = case_when(
+       z >= 3 ~ "gain",
+       z <= -3 ~ "loss", 
+       TRUE ~ "neutral"
+     ),
+     arm = factor(arm, levels = rev(chrlevels))
+   )
+ 
+
+  
+  
+
+```
+
+```{r plotting (2nd attempt)}
+
+cnv_plot_data <- arm_zscores %>%
+  mutate(
+    treatment = recode(
+      treatment, 
+      cancer = "Ovarian cancer", 
+      control = "Noncancer"
+    )
+  )
+
+cnv_plot <- ggplot(
+  cnv_plot_data,
+  aes(x = z, y = arm, colour = call)
+) +
+  geom_vline(xintercept = 0, linewidth = 0.25) +
+  geom_point(
+    size = 1.8, 
+    alpha = 0.85, 
+    position = position_jitter(height = 0.08, width = 0)
+  ) +
+  facet_grid(. ~ treatment) +
+  scale_colour_manual(
+    values = c(
+      gain = "red", 
+      loss = "blue"
+      #neutral = "purple"
+    )
+  ) +
+  scale_x_continuous(
+    limits = c(-10, 10),
+    oob = scales::squish, 
+    breaks = c(-10, 0, 10)
+  ) +
+  labs(x = "Chromosome-arm z-score", y = NULL) + 
+  theme_classic() +
+  theme(
+    legend.position = "none", 
+    strip.background = element_blank(),
+    strip.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(size = 7)
+  )
+
+cnv_plot
+```
+
+```{r importing data from TCGA}
+data("OV.CNV")
+
+tcga_samples <- tibble(sample = unique(OV.CNV$Sample))%>%
+mutate(sample_type = substr(sample,14,15))
+
+tumour_samples <- tcga_samples %>%
+  filter(sample_type =="01") %>%
+  pull(sample)
+
+tcga_cnv <- OV.CNV %>%
+  filter(Sample %in% tumour_samples) %>%
+  transmute(
+    chrom = Chromosome, 
+    start = Start,
+    end = End,
+    sample = Sample,
+    log2 = Segment_Mean
+  ) %>%
+ filter(
+   chrom %in% 1:22,
+   !is.na(start),
+   !is.na(end),
+   !is.na(log2)
+    )
+  
+  #filter(cnv_type != "neutral")
+
+
+gr_tcga <- GRanges(
+  seqnames = tcga_cnv$chrom,
+  ranges = IRanges(start = tcga_cnv$start, end = tcga_cnv$end), 
+  sample = tcga_cnv$sample,
+  log2 = tcga_cnv$log2
+)
+
+olaps_tcga <- findOverlaps(gr_arms, gr_tcga) 
+
+tcga_arm_overlaps <- tibble(
+  arm = mcols(gr_arms)$arm[queryHits(olaps_tcga)],
+  sample = mcols(gr_tcga)$sample[subjectHits(olaps_tcga)],
+  segment_log2 = mcols(gr_tcga)$log2[subjectHits(olaps_tcga)],
+  overlap_bp = width(
+    pintersect(
+      gr_arms[queryHits(olaps_tcga)],
+      gr_tcga[subjectHits(olaps_tcga)]
+    )
+  )
+)
+
+#calculating one weighted CNV per sample per chromosome arm
+
+tcga_arm_values <- tcga_arm_overlaps %>%
+  filter(
+    arm %in% chrlevels, 
+    overlap_bp > 0,
+  ) %>%
+  group_by(sample, arm) %>%
+  summarise(
+    arm_log2 = weighted.mean(
+      segment_log2,
+      w = overlap_bp,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    cnv_type = case_when(
+      arm_log2 > 0.3 ~ "gain",
+      arm_log2 < 0.3 ~ "loss",
+      TRUE ~ "neutral"
+    )
+  )
+
+n_tcga <- n_distinct(tcga_cnv$sample)
+
+tcga_arm_freq <- tcga_arm_values %>%
+  filter(cnv_type != "neutral") %>%
+  count(arm, cnv_type, name = "n")%>%
+  tidyr::complete(
+    arm = chrlevels,
+    cnv_type = c("gain", "loss"),
+    fill = list(n=0)
+  ) %>%
+  pivot_wider(
+    names_from = cnv_type,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  mutate(
+    gain_freq = gain/n_tcga,
+    loss_freq = loss/n_tcga,
+    loss_neg = -loss_freq,
+    arm = factor(arm, levels = rev(chrlevels))
+  )
+
+```
+
+
+```{r continuation of 2nd attempt plotting}
+
+p_tcga <- ggplot(tcga_arm_freq, aes(y = arm)) +
+  geom_col(aes(x = loss_neg), fill = "blue", width = 0.7) +
+  geom_col(aes(x = gain_freq), fill = "red", width = 0.7) +
+  geom_vline(xintercept = 0, linewidth = 0.25) +
+  scale_x_continuous(limits = c(-1, 1), 
+                     breaks = c(-1,-0.5, 0, 0.5, 1.0)) +
+  
+  labs(title = paste0( "TCGA Ovarian Cancers\n(n = 597)"),
+       x = "Fraction of samples",
+       y = NULL) +
+  theme_classic()+
+  theme(
+    axis.text.y = element_text(size = 7),
+    plot.title = element_text(
+      face = "bold",
+      hjust = 0.5,
+      size = 9
+    )
+  )
+
+p_tcga
+
+
+```
+
+```{r overall plot}
+
+overall_plot <- 
+  p_tcga + cnv_plot+
+  plot_layout(widths = c(1.15, 2.4)) &
+  theme(plot.margin = margin(5, 5, 5, 5))
+
+overall_plot
+
+ggsave("combined_cnv_plot.png")
+
+
+`
+``` 
