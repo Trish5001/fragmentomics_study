@@ -1,0 +1,402 @@
+---
+fettitle: "EM_6bp_analysis"
+author: "Trish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+```{r load libraries}
+
+library(tidyverse)
+library(pheatmap)
+library(openxlsx)
+library(BiocManager)
+library(TFBSTools)
+library(JASPAR2024)
+library(tibble)
+library(RSQLite)
+```
+
+```{r load data}
+
+EM6_files <- list.files("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/FinaleDB/endmotifs/EM_6bp", pattern = "EM6$", full.names = TRUE)
+  
+EM6 <- EM6_files %>%
+  set_names(basename(EM6_files)) %>%
+  map_dfr(
+    ~ read.delim(.x, header = FALSE), 
+    .id = "file"
+  ) %>%
+  rename(
+    end_motif = V1, 
+    frequency = V2
+  ) %>%
+  mutate(
+    treatment = if_else(
+      str_detect(file, "^Ascites"),
+      "cancer",
+      "control"
+    )
+    )
+  
+end_motif_means <- EM6%>%
+  group_by(end_motif, treatment)%>%
+  summarise(mean_freq = mean(frequency))%>%
+  ungroup()
+
+
+differences_df <- end_motif_means %>%
+  pivot_wider(names_from = treatment, values_from = mean_freq)%>%
+  mutate(diff = (cancer - control)) %>%
+  arrange(desc(diff))
+
+top_differences <- bind_rows(
+  differences_df %>% slice_head(n = 10),
+  differences_df %>% slice_tail(n = 10)
+) %>%
+  mutate(end_motif = factor(end_motif, levels = end_motif))
+
+#getting 10 biggest cancer drops as a list
+top_20_cancer_drops <- top_differences %>%
+  slice_head(n = 20) %>%
+  pull(end_motif)%>%
+  as.character()
+
+writeLines(top_20_cancer_drops, "top_20_cancer_drops.txt")
+
+
+# making a lollipop graph to show biggest differences
+
+lollipop6EM <- ggplot() +
+  geom_point(data = top_differences, aes(x = end_motif, y = cancer, colour = "Mean Cancer Values"), size = 3) +
+ geom_point(data = top_differences, aes(x = end_motif, y = control, colour = "Mean Control Values"), size = 3) +
+  geom_segment(data = top_differences, aes(x = end_motif, xend = end_motif, y = cancer, yend = control), colour = "grey30", linewidth = 0.5) +
+  
+  scale_colour_manual(
+    name = "Treatment",
+    values = c("Mean Cancer Values"= "magenta",
+               "Mean Control Values" = "blue")) +
+  labs(y = "Relative Frequencies",
+       x = "End Motif",
+       title = "End Motifs showing the biggest differences between \ncontrol and cancer conditions",
+       subtitle = "Top 10 differences where cancer is greater & Top 10 differences where cancer is lower") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+
+ggsave("lollipop6EM.pdf", width = 7, height = 5)
+
+```
+```{r}
+
+#to get a list of end-motifs with top differences
+
+top_list <- top_differences %>%
+  pull(end_motif)
+
+
+selected_samples <- EM6[EM6$end_motif %in% top_list,]
+selected_samples
+
+
+ggplot(data = selected_samples, aes(x = end_motif, 
+                                    y = frequency,
+                                    fill = treatment)) +
+  geom_boxplot(width = 0.4) + #position = "dodge") +
+  labs(x = "End Motif",
+       y = "Frequency",
+       title = "Mean Values for Cancer and Control Samples",
+       subtitle = "Top Ten differences where cancer higher and\n Top Ten where cancer lower ", 
+       fill = "Treatment") +
+  scale_fill_manual(
+    name = "Treatment",
+    values = c("cancer"= "magenta",
+               "control" = "blue")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major.x = element_line(colour = "grey90"),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.line = element_line(colour = "black"),
+        legend.key.width = unit(0.2, "cm"))
+
+ggsave("boxplot6EM.pdf", width = 7, height = 5)
+    
+```
+```{r making a heatmap}
+
+heatmapEM6_df <- EM6 %>%
+  select(file, end_motif, frequency) %>%
+  pivot_wider(names_from = file,
+              values_from = frequency)
+
+heatmapEM6.mat <- heatmapEM6_df %>%
+  column_to_rownames("end_motif") %>%
+  as.matrix()
+
+
+pheatmap(heatmapEM6.mat, 
+         fontsize_row = 2, 
+         cutree_rows = 4, 
+         filename = "overall_6EM_heatmap.png")
+
+         
+```
+```{r finding rownames in top cluster}
+
+hc <- hclust(dist(heatmapEM6.mat))
+
+clusters <- cutree(hc, k = 4)
+
+cluster1_rows <- rownames(heatmapEM6.mat)[clusters==1]
+cluster1_rows
+
+cluster1_mat <- heatmapEM6.mat[clusters == 4, ]
+
+pheatmap(cluster1_mat,
+         filename = "heatmap_detailing_oppositeTop_EM6.png")
+
+
+
+```
+```{r exploring heatmaps with zscores}
+
+pheatmap(heatmapEM6.mat,
+         scale = "row",
+         show_rownames = FALSE,
+         filename = "6EM_zscoresbyrow.png")
+
+pheatmap(heatmapEM6.mat,
+         scale = "column",
+         show_rownames = FALSE,
+         filename = "6EM_zscoresbycolumn.png")
+
+```
+
+```{r analysis to find which of the differences are significant}
+
+#finding absolute differences and calculating log2FX
+signif_analysis_df <- end_motif_means %>%
+  pivot_wider(names_from = treatment, values_from = mean_freq)%>%
+  mutate(abs_diff = abs(cancer - control),
+         log2FX = log2(cancer/control)) %>%
+  arrange(desc(control))
+
+
+#calculating pvalues
+motif_tests <- EM6 %>%
+  group_by(end_motif)%>%
+  summarise(
+    p.value = wilcox.test(frequency~treatment)$p.value )%>%
+    ungroup()
+
+#correction for multiple testing
+motif_tests <- motif_tests %>%
+  mutate(FDR = p.adjust(p.value, method = "BH"))
+
+#making a big table
+final_motif_results <- signif_analysis_df %>%
+  left_join(motif_tests, by="end_motif") %>%
+  arrange(desc(abs_diff)) %>%
+  filter(FDR < 0.05) %>%
+  #slice(1:50) %>%
+  mutate(end_motif = factor(end_motif, levels = unique(end_motif)), direction = if_else(log2FX > 0, "cancer-enriched", "control-enriched"))
+  
+
+#making a vector of these cancer enriched signigicant 6bp end-motifs
+cancerSigDiff_6bp_EM <- final_motif_results %>%
+  filter(direction == "cancer-enriched") #%>%
+  #pull(end_motif)%>%
+  #as.character()
+
+#making a vector of those control enriched signif 6bp end-motifs
+controlSigDiff_6bp_EM <- final_motif_results %>%
+  filter(direction == "control-enriched") %>%
+  pull(end_motif) %>%
+  as.character()
+
+
+```
+
+```{r creating meme files for tomtom}
+
+
+#write a function to create a matrix for 6bp end-motifs
+write_meme_file <- function(motifs, filename = "top50sigDiff_6bp_EM.meme"){
+  
+bases <- c("A", "C", "G", "T")
+
+con <- file(filename, open = "wt")
+on.exit(close(con))
+
+writeLines(
+  c(
+    "MEME version 4",
+    "",
+    "ALPHABET = ACGT",
+    "",
+    "strands: + -",
+    "",
+    "Background letter frequencies", 
+    "A 0.25 C 0.25 G 0.25 T 0.25",
+    ""
+  ),
+  con
+)
+
+for (motif in motifs) {
+  motif_bases <- strsplit(motif, " ")[[1]]
+  
+  motif_matrix <- t(
+    sapply(motif_bases, function(base) {
+      as.numeric(bases == base)
+    })
+  )
+  
+  writeLines(paste("MOTIF", motif), con)
+  
+  writeLines(
+    "letter-probability matrix: alength= 4 w= 6 nsites= 1 E= 0",
+    con
+  )
+  write.table(
+    motif_matrix, 
+    file = con,
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = FALSE
+  )
+  writeLines("", con)
+}
+  
+}
+
+#run the function for cancer-enriched
+write_meme_file(
+  motifs = cancerSigDiff_6bp_EM,
+  filename = "cancersigDiff_6bp_EM.meme"
+)
+
+#run the function for control-enriched
+write_meme_file(
+  motifs = controlSigDiff_6bp_EM,
+  filename = "controlsigDiff_6bp_EM.meme"
+)
+
+```
+
+```{r analysing output from tomtom}
+
+#making a dataframe with results from cancer enrichment analysis
+
+Cancer6bpEM <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/R_Code/Cancer6bpEM.tsv") 
+
+Cancer6bpEM <- Cancer6bpEM %>%
+  filter(q.value < 0.05)
+
+#setting up to utilise JASPAR2024 package
+
+con <- DBI::dbConnect(
+  RSQLite::SQLite(),
+  JASPAR2024::db(JASPAR2024())
+)
+#extracting target_ids from tomtom readout
+target_ids <- unique(Cancer6bpEM$Target_ID)
+
+jaspar_matches <- lapply(target_ids, function(matrix_id){
+  result <- TFBSTools::getMatrixSet(
+    con,
+    list(
+      ID = matrix_id,
+      all_versions = TRUE
+    )
+  )
+  if (length(result)==0) {return(NULL)}
+  result[[1]]
+})
+
+names(jaspar_matches) <- target_ids
+jaspar_matches <- jaspar_matches[!vapply(jaspar_matches, is.null, logical(1))]
+
+DBI::dbDisconnect(con)
+
+
+
+Cancer6bpEM_tf <- cancerSigDiff_6bp_EM %>%
+  inner_join(Cancer6bpEM, by = c("end_motif" = "Query_ID"))%>%
+  inner_join(jaspar_annotation, by = "Target_ID")
+
+jaspar_annotations <- do.call(
+  rbind,
+  lapply(jaspar_matches, function(motif) {
+    motif_tags <- tags(motif)
+
+    data.frame(
+      Target_ID = ID(motif),
+      TF_name = name(motif),
+      species = paste(motif_tags$species, collapse = "; "),
+      tax_group = paste(motif_tags$tax_group, collapse = "; "),
+      family = paste(motif_tags$family, collapse = "; "),
+      class = paste(motif_tags$class, collapse = "; "),
+      collection = paste(motif_tags$collection, collapse = "; "),
+      stringsAsFactors = FALSE
+    )
+  })
+)
+
+jaspar_annotations
+
+TFs_of_interest <- jaspar_annotations %>%
+  filter(species=="Homo sapiens")
+
+TFfamilies <- unique(TFs_of_interest$family)
+
+FOX_TF <- TFs_of_interest %>%
+  filter(family=="FOX")
+
+```
+```{r uploading results from tomtom}
+
+#uploading cancer tsv 
+Cancer6bpEM <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/R_Code/Cancer6bpEM.tsv") 
+
+#saving it as csv file 
+write.csv(Cancer6bpEM_tf,
+          "Cancer6pEM_tf.csv",
+          row.names = FALSE)
+
+#uploading control tsv file
+Control6bpEM <- read.delim("C:/Users/pquin/OneDrive - National University of Ireland, Galway/Research Project/R_Code/Control6bpEM.tsv")
+
+#saving it as a csv file
+write.csv(Control6bpEM,
+          "Control6bpEM_tf.csv",
+          row.names = FALSE)
+```
+
+```{r working backwards to get 6bp EM associated with FOX tf}
+
+
+
+
+
+
+Cancer6bpEM_FOX<- 
+  inner_join(Cancer6bpEM, FOX_TF, by ="Target_ID")
+
+
+
+```
+
